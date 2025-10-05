@@ -155,32 +155,36 @@ Go to `Firestore Database > Rules` in your Firebase console and paste the follow
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Products are publicly readable
+    
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.hasAny(['admin']);
+    }
+
     match /products/{productId} {
       allow read: if true;
-      // Only admins can write to products
-      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.hasAny(['admin']);
+      allow write: if isAdmin();
     }
 
-    // Users can only read/write their own data
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin(); // Admins can read user profiles
     }
     
-    // Users can read/write their own orders
-    match /user_orders/{orderId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+    match /orders/{orderId} {
+      // Users can read their own orders.
+      allow read, create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Admins can read and write all orders.
+      allow read, write: if isAdmin();
     }
     
-    // Admin can read all user orders
-    match /user_orders/{orderId} {
-        allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.hasAny(['admin']);
+    // Admins can list all orders.
+    match /orders {
+        allow list: if isAdmin();
     }
 
-    // Guest orders are write-only
     match /guest_orders/{orderId} {
-        allow create: if true;
-        allow read, update, delete: if false; // Or allow admin access
+      allow create: if true;
+      allow read, update, delete: if false;
     }
   }
 }
