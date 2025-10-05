@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
@@ -35,25 +36,32 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [cart]);
 
   const addToCart = useCallback((newItem: CartItem) => {
+    let itemAdded = false;
+    let alreadyInCart = false;
+
     setCart((prevCart) => {
       const existingItem = prevCart.find(
         (item) => item.productId === newItem.productId
       );
       if (existingItem) {
-        // In a real thrift store, you might not be able to add more than 1 of a unique item.
-        // For now, we'll just show a notification.
-        toast({
+        alreadyInCart = true;
+        return prevCart;
+      }
+      itemAdded = true;
+      return [...prevCart, { ...newItem, quantity: 1 }];
+    });
+
+    if (alreadyInCart) {
+       toast({
           title: "Item already in cart",
           description: `${newItem.name} is a unique item and is already in your cart.`,
         });
-        return prevCart;
-      }
+    } else if (itemAdded) {
       toast({
           title: "Added to cart!",
           description: `"${newItem.name}" is now in your cart.`,
       });
-      return [...prevCart, { ...newItem, quantity: 1 }]; // Ensure quantity is 1 for unique items
-    });
+    }
   }, [toast]);
 
   const removeFromCart = useCallback((productId: string) => {
