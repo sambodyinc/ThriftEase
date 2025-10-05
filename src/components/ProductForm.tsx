@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CATEGORIES, CONDITIONS, SIZES } from "@/lib/constants";
-import { ImageUp, Trash2, X } from "lucide-react";
+import { ImageUp, X } from "lucide-react";
 import React, { useState } from "react";
 import { useUploadFile } from "@/hooks/use-upload-file";
 import Image from "next/image";
@@ -118,7 +118,7 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
       
       {isUploading && (
         <div className="space-y-2">
-            <Progress value={Object.values(progress).reduce((a, b) => a + b, 0) / Object.keys(progress).length} />
+            <Progress value={Object.values(progress).reduce((a, b) => a + b, 0) / (Object.keys(progress).length || 1)} />
             <p className="text-sm text-muted-foreground">Uploading files, please wait...</p>
         </div>
       )}
