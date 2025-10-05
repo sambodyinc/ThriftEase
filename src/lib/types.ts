@@ -46,7 +46,7 @@ export type Order = {
   total: number;
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   paymentMethod: string;
-  timestamp: Date;
+  timestamp: any; // Allow for Firestore Timestamp
 };
 
 export type GuestOrder = Order & {
