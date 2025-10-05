@@ -1,3 +1,100 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "Stylish woman smiling, holding a stack of vintage clothes.",
+      "imageUrl": "https://images.unsplash.com/photo-1517583010307-3f789911b89c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx0aHJpZnQlMjBmYXNoaW9ufGVufDB8fHx8MTc1OTY4NzgxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "thrift fashion"
+    },
+    {
+      "id": "p001_1",
+      "description": "Front view of a vintage floral print midi dress.",
+      "imageUrl": "https://images.unsplash.com/photo-1503408024948-0a3e1b2b519c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmbG9yYWwlMjBkcmVzc3xlbnwwfHx8fDE3NTk2MDk1OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "floral dress"
+    },
+    {
+      "id": "p001_2",
+      "description": "Close-up of the fabric and pattern of the vintage floral dress.",
+      "imageUrl": "https://images.unsplash.com/photo-1682802739047-24fa5d983e71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkcmVzcyUyMHBhdHRlcm58ZW58MHx8fHwxNzU5Njg3ODE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dress pattern"
+    },
+    {
+      "id": "p001_3",
+      "description": "Back view of the vintage floral print midi dress.",
+      "imageUrl": "https://images.unsplash.com/photo-1647977845517-e0fc79c3b469?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkcmVzcyUyMGJhY2t8ZW58MHx8fHwxNzU5Njc5NjE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dress back"
+    },
+    {
+      "id": "p002_1",
+      "description": "Classic Levi's denim jacket on a hanger.",
+      "imageUrl": "https://images.unsplash.com/photo-1495105787522-5334e3ffa0ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkZW5pbSUyMGphY2tldHxlbnwwfHx8fDE3NTk1ODg1ODZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "denim jacket"
+    },
+    {
+      "id": "p002_2",
+      "description": "Detail shot of the Levi's jacket collar and tag.",
+      "imageUrl": "https://images.unsplash.com/photo-1599568723850-14196ee0f991?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxqYWNrZXQlMjBkZXRhaWx8ZW58MHx8fHwxNzU5Njg3ODE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "jacket detail"
+    },
+    {
+      "id": "p003_1",
+      "description": "A pair of gently used high-waisted mom jeans.",
+      "imageUrl": "https://images.unsplash.com/photo-1584642520442-5c5fbe4e7427?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb20lMjBqZWFuc3xlbnwwfHx8fDE3NTk1ODk0MzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mom jeans"
+    },
+    {
+      "id": "p004_1",
+      "description": "Graphic t-shirt with a retro band logo.",
+      "imageUrl": "https://images.unsplash.com/photo-1621446511130-0ed6519bfeb6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxncmFwaGljJTIwdGVlfGVufDB8fHx8MTc1OTY4NzgxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "graphic tee"
+    },
+    {
+      "id": "p005_1",
+      "description": "A stylish brown leather crossbody bag.",
+      "imageUrl": "https://images.unsplash.com/photo-1535120927584-0230f40fc1e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxsZWF0aGVyJTIwYmFnfGVufDB8fHx8MTc1OTY0NDQwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather bag"
+    },
+    {
+      "id": "p006_1",
+      "description": "Cozy oversized knit sweater in a cream color.",
+      "imageUrl": "https://images.unsplash.com/photo-1652904871839-2f815f42cb00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxrbml0JTIwc3dlYXRlcnxlbnwwfHx8fDE3NTk1NjkxMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "knit sweater"
+    },
+    {
+      "id": "p007_1",
+      "description": "A pair of vintage-style sunglasses with tortoise shell frames.",
+      "imageUrl": "https://images.unsplash.com/photo-1584036553516-bf83210aa16c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdW5nbGFzc2VzfGVufDB8fHx8MTc1OTY1NDk4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sunglasses"
+    },
+    {
+      "id": "p008_1",
+      "description": "A flowy bohemian print maxi skirt.",
+      "imageUrl": "https://images.unsplash.com/photo-1649566650740-cb0a625e1b40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtYXhpJTIwc2tpcnR8ZW58MHx8fHwxNzU5Njg2Njk4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "maxi skirt"
+    },
+    {
+      "id": "p009_1",
+      "description": "A classic plaid flannel shirt.",
+      "imageUrl": "https://images.unsplash.com/photo-1758506088339-505469f4463c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwbGFpZCUyMHNoaXJ0fGVufDB8fHx8MTc1OTU4NzU4M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "plaid shirt"
+    },
+    {
+      "id": "p010_1",
+      "description": "A black corduroy mini skirt.",
+      "imageUrl": "https://images.unsplash.com/photo-1527332042004-0b1a4d8646a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3JkdXJveSUyMHNraXJ0fGVufDB8fHx8MTc1OTY4NzgxOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "corduroy skirt"
+    },
+    {
+      "id": "p011_1",
+      "description": "A pair of broken-in Doc Martens boots.",
+      "imageUrl": "https://images.unsplash.com/photo-1602250523361-ff299f086e1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsZWF0aGVyJTIwYm9vdHN8ZW58MHx8fHwxNzU5NjY0MzA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather boots"
+    },
+    {
+      "id": "p012_1",
+      "description": "A silk scarf with a colorful abstract pattern.",
+      "imageUrl": "https://images.unsplash.com/photo-1517472292914-9570a594783b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzaWxrJTIwc2NhcmZ8ZW58MHx8fHwxNzU5NjU2MDUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "silk scarf"
+    }
+  ]
 }
