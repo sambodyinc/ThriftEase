@@ -114,21 +114,21 @@ export default function CheckoutPage() {
                                          <FormField control={form.control} name="city" render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>City</FormLabel>
-                                                <FormControl><Input {...field} /></FormControl>
+                                                <FormControl><Input placeholder="Nairobi" {...field} /></FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )} />
                                          <FormField control={form.control} name="state" render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>State / Province</FormLabel>
-                                                <FormControl><Input {...field} /></FormControl>
+                                                <FormLabel>County</FormLabel>
+                                                <FormControl><Input placeholder="Nairobi" {...field} /></FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )} />
                                         <FormField control={form.control} name="zip" render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>ZIP / Postal Code</FormLabel>
-                                                <FormControl><Input {...field} /></FormControl>
+                                                <FormControl><Input placeholder="00100" {...field} /></FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )} />
@@ -140,7 +140,7 @@ export default function CheckoutPage() {
                                             You will be prompted to enter your M-Pesa PIN on your phone to complete the transaction.
                                         </p>
                                         <div className="mt-4 p-4 border rounded-md bg-primary/5 flex items-center gap-4">
-                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1280px-M-PESA_LOGO-01.svg.png" alt="M-Pesa Logo" className="h-6" />
+                                            <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1280px-M-PESA_LOGO-01.svg.png" alt="M-Pesa Logo" width={80} height={24} />
                                             <span className="font-semibold">Pay with M-Pesa</span>
                                         </div>
                                     </div>

@@ -4,7 +4,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p001',
     name: 'Vintage Floral Midi Dress',
-    price: 45.00,
+    price: 1500.00,
     description: 'A beautiful vintage midi dress with a delicate floral pattern. Perfect for sunny afternoons. Features a button-up front and a tie waist.',
     category: 'Dresses',
     condition: 'Vintage',
@@ -18,7 +18,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p002',
     name: 'Classic Denim Jacket',
-    price: 60.00,
+    price: 2500.00,
     description: 'A timeless Levi\'s denim jacket in a medium wash. An essential wardrobe staple that goes with everything. Broken in for a comfortable fit.',
     category: 'Outerwear',
     condition: 'Gently Used',
@@ -32,7 +32,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p003',
     name: 'High-Waisted Mom Jeans',
-    price: 35.00,
+    price: 1200.00,
     description: 'Comfortable and stylish high-waisted mom jeans in a light wash. Features a relaxed fit and tapered leg. 100% cotton.',
     category: 'Bottoms',
     condition: 'Gently Used',
@@ -46,7 +46,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p004',
     name: 'Retro Band T-Shirt',
-    price: 25.00,
+    price: 800.00,
     description: 'A soft, worn-in graphic tee featuring a retro band logo. Perfect for a casual, edgy look. Single stitch, made in the USA.',
     category: 'Tops',
     condition: 'Vintage',
@@ -60,7 +60,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p005',
     name: 'Leather Crossbody Bag',
-    price: 55.00,
+    price: 2000.00,
     description: 'A high-quality brown leather crossbody bag with brass hardware. Features multiple compartments and an adjustable strap. Minimal signs of wear.',
     category: 'Accessories',
     condition: 'Like New',
@@ -74,7 +74,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p006',
     name: 'Oversized Knit Sweater',
-    price: 40.00,
+    price: 1800.00,
     description: 'A cozy, oversized chunky knit sweater in a warm cream color. Made from a soft wool blend. Ideal for layering in cooler weather.',
     category: 'Tops',
     condition: 'Like New',
@@ -88,7 +88,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p007',
     name: 'Tortoise Shell Sunglasses',
-    price: 28.00,
+    price: 750.00,
     description: 'Stylish vintage-inspired sunglasses with classic tortoise shell frames and UV400 protection lenses.',
     category: 'Accessories',
     condition: 'Like New',
@@ -102,7 +102,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p008',
     name: 'Bohemian Maxi Skirt',
-    price: 38.00,
+    price: 1300.00,
     description: 'A flowy, lightweight maxi skirt with a vibrant bohemian print. Features an elastic waistband for a comfortable fit.',
     category: 'Bottoms',
     condition: 'Gently Used',
@@ -116,7 +116,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p009',
     name: 'Classic Plaid Flannel Shirt',
-    price: 32.00,
+    price: 1000.00,
     description: 'A soft and durable plaid flannel shirt in a red and black pattern. Can be worn as a shirt or an overshirt.',
     category: 'Tops',
     condition: 'Gently Used',
@@ -130,7 +130,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p010',
     name: 'Corduroy Mini Skirt',
-    price: 30.00,
+    price: 900.00,
     description: 'A-line mini skirt made from soft black corduroy. A versatile piece for any season. Features a front zipper closure.',
     category: 'Bottoms',
     condition: 'Like New',
@@ -144,7 +144,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p011',
     name: 'Doc Martens Boots',
-    price: 95.00,
+    price: 3000.00,
     description: 'Iconic Doc Martens 1460 boots in black leather. Perfectly broken-in with a lifetime of wear left. Some scuffs add to the character.',
     category: 'Accessories',
     condition: 'Vintage',
@@ -158,7 +158,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'p012',
     name: 'Abstract Silk Scarf',
-    price: 22.00,
+    price: 650.00,
     description: 'A beautiful 100% silk scarf with a colorful abstract pattern. Can be worn as a neck scarf, head wrap, or bag accessory.',
     category: 'Accessories',
     condition: 'Vintage',
