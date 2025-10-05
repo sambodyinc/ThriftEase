@@ -67,6 +67,9 @@ export default function AdminPage() {
             Admin Dashboard
           </h1>
           <div className="flex items-center space-x-2">
+            <Button asChild>
+                <Link href="/admin/products">Manage Products</Link>
+            </Button>
             <Button>Download Report</Button>
           </div>
         </div>
