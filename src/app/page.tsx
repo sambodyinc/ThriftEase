@@ -103,9 +103,6 @@ export default function Home() {
                     Shop Now <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild variant="ghost" size="lg">
-                  <Link href="/about">Learn More <span aria-hidden="true">→</span></Link>
-                </Button>
               </div>
             </div>
             {heroImage && (

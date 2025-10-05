@@ -17,7 +17,6 @@ import { useCart } from '@/hooks/use-cart';
 const navLinks = [
   { href: '/shop', label: 'Shop' },
   { href: '/shop?filter=new-arrivals', label: 'New Arrivals' },
-  { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
 

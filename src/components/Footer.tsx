@@ -15,15 +15,6 @@ const Footer = () => {
       ],
     },
     {
-      title: 'About',
-      links: [
-        { label: 'Our Story', href: '/about' },
-        { label: 'Sustainability', href: '/sustainability' },
-        { label: 'Contact Us', href: '/contact' },
-        { label: 'FAQ', href: '/faq' },
-      ],
-    },
-    {
       title: 'Support',
       links: [
         { label: 'Shipping & Returns', href: '/shipping' },
