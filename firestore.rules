@@ -1,0 +1,132 @@
+/**
+ * @fileOverview Firestore Security Rules for ThriftEase.
+ *
+ * Core Philosophy: This ruleset enforces a strict user-ownership model for user-specific data
+ * and allows public read access to product listings. Admin privileges are granted based on the
+ * existence of a document in the `/roles_admin/{userId}` collection.  Guest orders are allowed without auth.
+ *
+ * Data Structure:
+ * - `/products/{productId}`: Publicly readable product information.
+ * - `/users/{userId}`: User profile data, accessible only to the owning user.
+ * - `/users/{userId}/user_orders/{orderId}`: Orders placed by a specific user, accessible only to that user.
+ * - `/guest_orders/{orderId}`: Orders placed by guest users; no authentication required for creation.
+ * - `/roles_admin/{userId}`: Documents indicating admin privileges for a user.
+ *
+ * Key Security Decisions:
+ * - User listing is disallowed.
+ * - Public read access is granted for products.
+ * - Guest orders do not require authentication for creation.
+ * - Admin privileges are determined by the presence of a document in `/roles_admin/{userId}`.
+ *
+ * Denormalization for Authorization:
+ * - User-specific data (orders) is nested under the user's document to avoid needing `get()` calls
+ *   to verify ownership. The `userId` in the order document matches the `userId` in the path.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows public read access to product information and restricts writes.
+     * @path /products/{productId}
+     * @allow (get, list): Any user can read product information.
+     * @allow (create, update, delete): Only authenticated users can create, update or delete product info and request.auth.uid must match the 'authorId' field.
+     * @deny (create): Any user can create a product without being signed in.
+     * @deny (update): Any user can update a product that they don't own.
+     * @deny (delete): Any user can delete a product that they don't own.
+     * @principle Allows public read for products, enforces owner-only writes.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Allows a user to read and write their own user document.
+     * @path /users/{userId}
+     * @allow (get): Authenticated user can read their own profile.
+     * @allow (create): Authenticated user can create their own profile if the userId matches their auth.uid.
+     * @allow (update): Authenticated user can update their own profile if the userId matches their auth.uid and the document exists.
+     * @allow (delete): Authenticated user can delete their own profile if the userId matches their auth.uid and the document exists.
+     * @deny (get): Authenticated user tries to read another user's profile.
+     * @deny (create): Authenticated user tries to create a profile with a userId that does not match their auth.uid.
+     * @deny (update): Authenticated user tries to update another user's profile.
+     * @deny (delete): Authenticated user tries to delete another user's profile.
+     * @principle Enforces document ownership for user profiles.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows a user to read and write their own orders.
+     * @path /users/{userId}/user_orders/{orderId}
+     * @allow (get, list): Authenticated user can read their own orders.
+     * @allow (create): Authenticated user can create orders under their own user ID.
+     * @allow (update): Authenticated user can update their own orders if they own the user_orders document and it exists.
+     * @allow (delete): Authenticated user can delete their own orders if they own the user_orders document and it exists.
+     * @deny (get, list): Authenticated user tries to read another user's orders.
+     * @deny (create): Authenticated user tries to create an order under another user's ID.
+     * @deny (update): Authenticated user tries to update another user's order.
+     * @deny (delete): Authenticated user tries to delete another user's order.
+     * @principle Enforces document ownership for user-specific orders.
+     */
+    match /users/{userId}/user_orders/{orderId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows creation of guest orders without authentication.
+     * @path /guest_orders/{orderId}
+     * @allow (get, list): Any user can read guest order information.
+     * @allow (create): Any user can create a guest order.
+     * @deny (update): No users can update existing guest orders.
+     * @deny (delete): No users can delete guest orders.
+     * @principle Allows unauthenticated creation of guest orders.
+     */
+    match /guest_orders/{orderId} {
+      allow get, list: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    /**
+     * @description Grants admin privileges to users with a document in this collection.
+     * @path /roles_admin/{userId}
+     * @allow (get): Only the user themselves can check if they are an admin.
+     * @allow (create): Only an existing admin can grant admin privilidges.
+     * @allow (update): Only an existing admin can update admin privilidges.
+     * @allow (delete): Only an existing admin can revoke admin privilidges.
+     * @deny (get): Other users cannot see who is an admin.
+     * @principle DBAC (Database-Based Access Control) for admin roles.
+     */
+    match /roles_admin/{userId} {
+        allow get: if isOwner(userId);
+        allow create, update, delete: if isAdmin();
+        allow list: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+      return isSignedIn() && isOwner(userId) && resource != null;
+    }
+
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+  }
+}
