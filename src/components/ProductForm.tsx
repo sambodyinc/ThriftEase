@@ -65,8 +65,8 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
     const uploadedUrls = await uploadFiles(files);
     const newImageUrls = [...(field.value || []), ...uploadedUrls];
     field.onChange(newImageUrls);
-    form.trigger("images"); // Re-validate the images field
-    setFiles([]); // Clear the file list after upload
+    form.trigger("images");
+    setFiles([]);
   };
 
   const handleRemoveUrl = (urlToRemove: string) => {
@@ -75,7 +75,6 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
 
   return (
     <div className="space-y-4">
-      {/* Display uploaded images */}
       {field.value && field.value.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {field.value.map((url: string, index: number) => (
@@ -95,7 +94,6 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
         </div>
       )}
 
-      {/* File input */}
       <div className="flex items-center gap-4">
         <Input
           type="file"
@@ -267,7 +265,7 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a condition" />
-                    </SelectTrigger>
+                    </Trigger>
                   </FormControl>
                   <SelectContent>
                     {CONDITIONS.map((c) => (
