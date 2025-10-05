@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Poppins, Source_Code_Pro } from 'next/font/google';
+import { FirebaseClientProvider } from '@/firebase';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -38,15 +39,19 @@ export default function RootLayout({
       <head>
       </head>
       <body className="font-body antialiased">
-        <Providers>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-          </div>
-          <Toaster />
-        </Providers>
+        <FirebaseClientProvider>
+          <Providers>
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </div>
+            <Toaster />
+          </Providers>
+        </FirebaseClientProvider>
       </body>
     </html>
   );
 }
+
+    

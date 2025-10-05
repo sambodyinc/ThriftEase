@@ -11,6 +11,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from 'next/navigation'
+import { useAuth } from "@/firebase"
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
+import { initiateEmailSignIn } from "@/firebase/non-blocking-login"
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -29,6 +32,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const auth = useAuth();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -36,8 +40,7 @@ export default function LoginPage() {
   });
 
   const onLogin = (values: z.infer<typeof loginSchema>) => {
-    console.log("Login attempt with:", values);
-    // In a real app, you would call your Firebase auth function here.
+    initiateEmailSignIn(auth, values.email, values.password);
     toast({
       title: "Login Successful",
       description: "Welcome back!",
@@ -45,14 +48,22 @@ export default function LoginPage() {
     router.push('/account');
   };
   
-  const onGoogleLogin = () => {
-    console.log("Google login attempt");
-    // In a real app, you would call your Firebase Google sign-in function here.
-     toast({
-      title: "Login Successful",
-      description: "Welcome back!",
-    });
-    router.push('/account');
+  const onGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      router.push('/account');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error.message || "Could not sign in with Google.",
+      });
+    }
   }
 
   return (
@@ -103,3 +114,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+    
