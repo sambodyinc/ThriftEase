@@ -51,7 +51,7 @@ type ProductFormProps = {
   isSubmitting: boolean;
 };
 
-const ImageUploader = ({ field }: { field: any }) => {
+const ImageUploader = ({ field, form }: { field: any, form: any }) => {
   const [files, setFiles] = useState<File[]>([]);
   const { uploadFiles, isUploading, progress } = useUploadFile();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -65,6 +65,7 @@ const ImageUploader = ({ field }: { field: any }) => {
     const uploadedUrls = await uploadFiles(files);
     const newImageUrls = [...(field.value || []), ...uploadedUrls];
     field.onChange(newImageUrls);
+    form.trigger("images"); // Re-validate the images field
     setFiles([]); // Clear the file list after upload
   };
 
@@ -242,7 +243,7 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a size" />
-                    </SelectTrigger>
+                    </Trigger>
                   </FormControl>
                   <SelectContent>
                     {SIZES.map((s) => (
@@ -292,7 +293,7 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
                 Upload one or more images for the product. The first image will be the main display image.
               </FormDescription>
               <FormControl>
-                <ImageUploader field={field} />
+                <ImageUploader field={field} form={form} />
               </FormControl>
               <FormMessage />
             </FormItem>
