@@ -65,7 +65,7 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
     const uploadedUrls = await uploadFiles(files);
     const newImageUrls = [...(field.value || []), ...uploadedUrls];
     field.onChange(newImageUrls);
-    form.trigger("images");
+    form.trigger("images"); // Manually trigger validation for the images field
     setFiles([]);
   };
 
