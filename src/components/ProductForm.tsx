@@ -58,19 +58,26 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(event.target.files || []);
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    if (newFiles.length > 0) {
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    }
   };
 
   const handleUpload = async () => {
+    if (files.length === 0) return;
     const uploadedUrls = await uploadFiles(files);
-    const newImageUrls = [...(field.value || []), ...uploadedUrls];
-    field.onChange(newImageUrls);
-    form.trigger("images"); // Manually trigger validation for the images field
-    setFiles([]);
+    if (uploadedUrls.length > 0) {
+      const newImageUrls = [...(field.value || []), ...uploadedUrls];
+      field.onChange(newImageUrls);
+      form.trigger("images"); // Manually trigger validation for the images field
+      setFiles([]);
+    }
   };
 
   const handleRemoveUrl = (urlToRemove: string) => {
-    field.onChange(field.value.filter((url: string) => url !== urlToRemove));
+    const newImageUrls = field.value.filter((url: string) => url !== urlToRemove);
+    field.onChange(newImageUrls);
+    form.trigger("images");
   };
 
   return (
@@ -79,7 +86,7 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {field.value.map((url: string, index: number) => (
             <div key={index} className="relative group aspect-square">
-              <Image src={url} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md" />
+              <Image src={url} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md border" />
               <Button
                 type="button"
                 variant="destructive"
@@ -88,6 +95,7 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
                 onClick={() => handleRemoveUrl(url)}
               >
                 <X className="h-4 w-4" />
+                <span className="sr-only">Remove image</span>
               </Button>
             </div>
           ))}
@@ -105,11 +113,11 @@ const ImageUploader = ({ field, form }: { field: any, form: any }) => {
         />
         <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
           <ImageUp className="mr-2 h-4 w-4" />
-          Choose Files ({files.length})
+          Choose Files ({files.length} selected)
         </Button>
         {files.length > 0 && (
           <Button type="button" onClick={handleUpload} disabled={isUploading}>
-            {isUploading ? "Uploading..." : "Upload Files"}
+            {isUploading ? "Uploading..." : "Upload & Add Files"}
           </Button>
         )}
       </div>
@@ -128,9 +136,7 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData
-      ? {
-          ...initialData,
-        }
+      ? { ...initialData }
       : {
           name: "",
           description: "",
@@ -241,7 +247,7 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a size" />
-                    </Trigger>
+                    </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {SIZES.map((s) => (
@@ -265,7 +271,7 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a condition" />
-                    </Trigger>
+                    </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {CONDITIONS.map((c) => (
@@ -308,7 +314,7 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
                   <FormLabel>Featured Product</FormLabel>
                   <FormDescription>
                     Featured products appear on the home page.
-                  </FormDescription>
+                  </Form.Description>
                 </div>
                 <FormControl>
                   <Switch
@@ -328,7 +334,7 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
                   <FormLabel>Sold Status</FormLabel>
                   <FormDescription>
                     Mark this product as sold.
-                  </FormDescription>
+                  </Form.Description>
                 </div>
                 <FormControl>
                   <Switch
@@ -348,3 +354,5 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
     </Form>
   );
 };
+
+    
