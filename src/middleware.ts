@@ -6,9 +6,9 @@ import type { NextRequest } from 'next/server';
 const isAuthenticatedAsAdmin = (request: NextRequest): boolean => {
   // To test, you can use a query param or a hardcoded cookie value.
   // Example: return request.cookies.get('session')?.value === 'admin-secret';
-  // For this demo, we'll deny access to show the redirect.
-  // Change to `return true;` to access the admin panel.
-  return false; 
+  // For this demo, we are granting access for development.
+  // In production, replace this with real authentication.
+  return true; 
 };
 
 export function middleware(request: NextRequest) {
