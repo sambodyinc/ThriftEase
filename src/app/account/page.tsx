@@ -4,9 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUser } from "@/firebase";
+import { useUser, useAuth } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { updateProfile } from "firebase/auth";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 // Mock data for orders, will be replaced with real data later
 const orders = [
@@ -15,9 +24,52 @@ const orders = [
     { id: "ORD003", date: "2023-10-25", total: 28.00, status: "Processing", items: 1 },
 ];
 
+const profileSchema = z.object({
+  displayName: z.string().min(2, { message: "Name must be at least 2 characters." }),
+});
+
+
 export default function AccountPage() {
     const { user, isUserLoading } = useUser();
     const router = useRouter();
+    const auth = useAuth();
+    const { toast } = useToast();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const form = useForm<z.infer<typeof profileSchema>>({
+        resolver: zodResolver(profileSchema),
+        defaultValues: {
+            displayName: user?.displayName || "",
+        },
+    });
+
+    // Reset form when user data is available
+    if (user && form.getValues().displayName !== user.displayName) {
+        form.reset({ displayName: user.displayName || "" });
+    }
+
+    const onProfileUpdate = async (values: z.infer<typeof profileSchema>) => {
+        if (!auth.currentUser) {
+            toast({ variant: "destructive", title: "Not authenticated" });
+            return;
+        }
+
+        try {
+            await updateProfile(auth.currentUser, {
+                displayName: values.displayName,
+            });
+            toast({ title: "Profile updated successfully!" });
+            setIsDialogOpen(false);
+            // The onAuthStateChanged listener will pick up the change and re-render.
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Error updating profile",
+                description: error.message,
+            });
+        }
+    };
+
 
     if (isUserLoading) {
         return <AccountPageSkeleton />;
@@ -48,8 +100,42 @@ export default function AccountPage() {
                         <CardDescription>{user.email}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Button variant="outline" className="w-full">Edit Profile</Button>
-                        <Button variant="destructive" className="w-full mt-2">Sign Out</Button>
+                         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="w-full">Edit Profile</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Edit Profile</DialogTitle>
+                                    <DialogDescription>
+                                        Update your display name. Click save when you're done.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <Form {...form}>
+                                    <form onSubmit={form.handleSubmit(onProfileUpdate)} className="space-y-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="displayName"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Display Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Your name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <DialogFooter>
+                                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                                                {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+                        <Button variant="destructive" className="w-full mt-2" onClick={() => auth.signOut()}>Sign Out</Button>
                     </CardContent>
                 </Card>
 
@@ -91,7 +177,11 @@ export default function AccountPage() {
                                     <CardDescription>Manage your personal and shipping information.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <p>Profile editing form will go here.</p>
+                                    <div className="space-y-2">
+                                        <p><span className="font-semibold">Full Name:</span> {user.displayName}</p>
+                                        <p><span className="font-semibold">Email:</span> {user.email}</p>
+                                        <p className="text-muted-foreground pt-4">More profile fields coming soon!</p>
+                                    </div>
                                 </CardContent>
                             </Card>
                         </TabsContent>
