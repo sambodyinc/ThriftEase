@@ -14,6 +14,9 @@ import * as z from "zod";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, useFirestore, addDocumentNonBlocking } from "@/firebase";
+import { collection, serverTimestamp } from "firebase/firestore";
+import { UserOrder } from "@/lib/types";
 
 const checkoutSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -29,12 +32,14 @@ export default function CheckoutPage() {
     const { cart, cartTotal, clearCart } = useCart();
     const router = useRouter();
     const { toast } = useToast();
+    const { user } = useAuth();
+    const firestore = useFirestore();
 
     const form = useForm<z.infer<typeof checkoutSchema>>({
         resolver: zodResolver(checkoutSchema),
         defaultValues: {
-            name: "",
-            email: "",
+            name: user?.displayName || "",
+            email: user?.email || "",
             phone: "",
             address: "",
             city: "",
@@ -43,25 +48,47 @@ export default function CheckoutPage() {
         },
     });
 
-    if (cart.length === 0) {
-        // In a real app, you might want to redirect, but for now, we'll show a message.
-        // On component mount, this could cause a redirect.
-         if (typeof window !== "undefined") {
-            router.push('/shop');
-         }
-         return null;
+     if (typeof window !== "undefined" && cart.length === 0) {
+        router.push('/shop');
+        return null;
     }
 
     const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
-        console.log("Form submitted with values:", values);
-        // Here you would handle payment processing with M-Pesa or another gateway.
-        // For now, we'll simulate a successful order.
+        if (!user) {
+             toast({
+                variant: "destructive",
+                title: "Not authenticated",
+                description: "You must be logged in to place an order.",
+            });
+            router.push('/login?next=/checkout');
+            return;
+        }
+
+        const newOrder: Omit<UserOrder, 'id' | 'createdAt'> = {
+            userId: user.uid,
+            customerName: values.name,
+            items: cart,
+            total: cartTotal,
+            status: 'Pending',
+            paymentMethod: 'M-Pesa',
+        };
+
+        const ordersRef = collection(firestore, 'orders');
+        
+        // Use non-blocking write
+        addDocumentNonBlocking(ordersRef, {
+            ...newOrder,
+            createdAt: serverTimestamp(),
+        });
+        
+        // In a real scenario, you'd also mark products as "sold" here.
+
         toast({
             title: "Order Placed!",
             description: "Thank you for your purchase. A confirmation has been sent.",
         });
         clearCart();
-        router.push("/account/orders?success=true");
+        router.push("/account");
     };
 
     return (
@@ -145,8 +172,8 @@ export default function CheckoutPage() {
                                         </div>
                                     </div>
 
-                                    <Button type="submit" size="lg" className="w-full">
-                                        Pay {formatCurrency(cartTotal)}
+                                    <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
+                                        {form.formState.isSubmitting ? "Placing Order..." : `Pay ${formatCurrency(cartTotal)}`}
                                     </Button>
                                 </form>
                             </Form>
@@ -199,3 +226,5 @@ export default function CheckoutPage() {
         </div>
     );
 }
+
+    

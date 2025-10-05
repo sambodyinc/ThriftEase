@@ -18,7 +18,7 @@ import { updateProfile } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { UserOrder } from "@/lib/types";
-import { collection } from "firebase/firestore";
+import { collection, query, where, orderBy } from "firebase/firestore";
 import { formatCurrency } from "@/lib/utils";
 
 const profileSchema = z.object({
@@ -36,7 +36,8 @@ export default function AccountPage() {
 
     const ordersQuery = useMemoFirebase(() => {
         if (!user) return null;
-        return collection(firestore, 'users', user.uid, 'user_orders');
+        const ordersRef = collection(firestore, 'orders');
+        return query(ordersRef, where("userId", "==", user.uid), orderBy("createdAt", "desc"));
     }, [firestore, user]);
 
     const { data: orders, isLoading: isLoadingOrders } = useCollection<UserOrder>(ordersQuery);
@@ -176,8 +177,8 @@ export default function AccountPage() {
                                             orders.map(order => (
                                                 <div key={order.id} className="flex justify-between items-center p-4 border rounded-md">
                                                     <div>
-                                                        <p className="font-semibold">{order.id.substring(0, 7).toUpperCase()}</p>
-                                                        <p className="text-sm text-muted-foreground">{formatOrderDate(order.timestamp)} - {order.items.length} item(s)</p>
+                                                        <p className="font-semibold">#{order.id.substring(0, 7).toUpperCase()}</p>
+                                                        <p className="text-sm text-muted-foreground">{formatOrderDate(order.createdAt)} - {order.items.length} item(s)</p>
                                                     </div>
                                                     <div className="text-right">
                                                          <p className="font-semibold">{formatCurrency(order.total)}</p>

@@ -1,3 +1,6 @@
+
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,24 +18,48 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
-import { DollarSign, Package, ShoppingCart, Users, ArrowUpRight } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Users } from "lucide-react";
 import Link from 'next/link';
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy, limit } from "firebase/firestore";
+import { Product, UserOrder } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Mock data - replace with real data fetching
-const summaryStats = {
-    revenue: { value: 12540, change: "+15.2%" },
-    orders: { value: 342, change: "+8.1%" },
-    customers: { value: 89, change: "+20" },
-    products: { value: 215 },
-};
-
-const recentOrders = [
-    { id: 'ORD015', customer: 'Alice Johnson', total: 75.00, status: 'Shipped' },
-    { id: 'ORD014', customer: 'Bob Williams', total: 42.50, status: 'Processing' },
-    { id: 'ORD013', customer: 'Charlie Brown', total: 112.00, status: 'Delivered' },
-];
+const StatCard = ({ title, value, icon, description, isLoading }: { title: string, value: string, icon: React.ReactNode, description?: string, isLoading: boolean }) => (
+    <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            {icon}
+        </CardHeader>
+        <CardContent>
+            {isLoading ? <Skeleton className="h-8 w-3/4" /> : <div className="text-2xl font-bold">{value}</div>}
+            {description && !isLoading && <p className="text-xs text-muted-foreground">{description}</p>}
+        </CardContent>
+    </Card>
+);
 
 export default function AdminPage() {
+    const firestore = useFirestore();
+
+    const ordersQuery = useMemoFirebase(() => collection(firestore, "orders"), [firestore]);
+    const recentOrdersQuery = useMemoFirebase(() => query(ordersQuery, orderBy("createdAt", "desc"), limit(5)), [ordersQuery]);
+    const productsQuery = useMemoFirebase(() => collection(firestore, "products"), [firestore]);
+
+    const { data: orders, isLoading: isLoadingOrders } = useCollection<UserOrder>(ordersQuery);
+    const { data: recentOrders, isLoading: isLoadingRecentOrders } = useCollection<UserOrder>(recentOrdersQuery);
+    const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
+
+    const totalRevenue = orders?.reduce((acc, order) => acc + order.total, 0) || 0;
+    const availableProducts = products?.filter(p => !p.isSold).length || 0;
+
+    const isLoading = isLoadingOrders || isLoadingProducts || isLoadingRecentOrders;
+
+    const formatOrderDate = (timestamp: any) => {
+        if (!timestamp) return 'N/A';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString();
+    }
+
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
        <div className="flex items-center justify-between space-y-2">
@@ -44,85 +71,78 @@ export default function AdminPage() {
           </div>
         </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summaryStats.revenue.value)}</div>
-            <p className="text-xs text-muted-foreground">
-              {summaryStats.revenue.change} from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Orders</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+{summaryStats.orders.value}</div>
-            <p className="text-xs text-muted-foreground">
-                {summaryStats.orders.change} from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Customers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+{summaryStats.customers.value}</div>
-             <p className="text-xs text-muted-foreground">
-              in the last 30 days
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Products in Stock</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summaryStats.products.value}</div>
-            <p className="text-xs text-muted-foreground">
-              Total active listings
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+            title="Total Revenue"
+            value={formatCurrency(totalRevenue)}
+            isLoading={isLoadingOrders}
+            icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
+            description="All-time gross revenue"
+        />
+         <StatCard
+            title="Orders"
+            value={orders?.length.toString() || '0'}
+            isLoading={isLoadingOrders}
+            icon={<ShoppingCart className="h-4 w-4 text-muted-foreground" />}
+            description="Total orders placed"
+        />
+        <StatCard
+            title="Products in Stock"
+            value={availableProducts.toString()}
+            isLoading={isLoadingProducts}
+            icon={<Package className="h-4 w-4 text-muted-foreground" />}
+            description="Total active listings"
+        />
       </div>
       <Card>
         <CardHeader>
           <CardTitle>Recent Orders</CardTitle>
-           <CardDescription>A list of the most recent orders.</CardDescription>
+           <CardDescription>A list of the 5 most recent orders.</CardDescription>
         </CardHeader>
         <CardContent>
            <Table>
                 <TableHeader>
                     <TableRow>
                     <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
+                    <TableHead>User ID</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead className="text-right">Total</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {recentOrders.map((order) => (
-                    <TableRow key={order.id}>
-                        <TableCell className="font-medium">{order.id}</TableCell>
-                        <TableCell>{order.customer}</TableCell>
-                        <TableCell>{order.status}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(order.total)}</TableCell>
-                    </TableRow>
-                    ))}
+                    {isLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                                <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                                <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
+                            </TableRow>
+                        ))
+                    ) : recentOrders && recentOrders.length > 0 ? (
+                        recentOrders.map((order) => (
+                            <TableRow key={order.id}>
+                                <TableCell className="font-medium">{order.id.substring(0, 7).toUpperCase()}</TableCell>
+                                <TableCell className="text-sm text-muted-foreground">{order.userId.substring(0,10)}...</TableCell>
+                                <TableCell>{order.status}</TableCell>
+                                <TableCell>{formatOrderDate(order.createdAt)}</TableCell>
+                                <TableCell className="text-right">{formatCurrency(order.total)}</TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                         <TableRow>
+                            <TableCell colSpan={5} className="h-24 text-center">
+                                No recent orders found.
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
              <div className="flex items-center justify-end space-x-2 pt-4">
                 <Button asChild variant="outline" size="sm">
-                   <Link href="#">View all orders</Link>
+                   <Link href="/admin/orders">View all orders</Link>
                 </Button>
             </div>
         </CardContent>
@@ -130,3 +150,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
