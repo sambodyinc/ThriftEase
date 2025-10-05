@@ -10,14 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 import * as z from "zod";
 import { Product } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CATEGORIES, SIZES, CONDITIONS } from "@/lib/constants";
+
 
 const formSchema = z.object({
   name: z.string().min(3),
   description: z.string().min(10),
   price: z.coerce.number().positive(),
-  category: z.string(),
-  size: z.string(),
-  condition: z.string(),
+  category: z.enum(CATEGORIES),
+  size: z.enum(SIZES),
+  condition: z.enum(CONDITIONS),
   color: z.string().min(2),
   images: z.array(z.string().url()).min(1),
   isFeatured: z.boolean(),
