@@ -1,5 +1,5 @@
+
 import { sampleProducts } from '@/lib/data';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,6 @@ export default function ProductPage({ params }: { params: { productId: string } 
     notFound();
   }
   
-  const productImages = product.images.map(id => PlaceHolderImages.find(p => p.id === id)).filter(Boolean);
   const similarItems = sampleProducts.filter(p => p.category === product.category && p.id !== product.id && !p.isSold).slice(0, 4);
 
   return (
@@ -34,16 +33,15 @@ export default function ProductPage({ params }: { params: { productId: string } 
           <div>
             <Carousel className="w-full">
               <CarouselContent>
-                {productImages.map((img, index) => (
+                {product.images.map((imgUrl, index) => (
                   <CarouselItem key={index}>
                     <div className="aspect-w-3 aspect-h-4 overflow-hidden rounded-lg shadow-lg">
-                      {img && <Image
-                        src={img.imageUrl}
+                       <Image
+                        src={imgUrl}
                         alt={`${product.name} image ${index + 1}`}
                         fill
-                        data-ai-hint={img.imageHint}
                         className="object-cover object-center"
-                      />}
+                      />
                     </div>
                   </CarouselItem>
                 ))}

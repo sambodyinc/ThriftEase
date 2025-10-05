@@ -1,3 +1,4 @@
+
 import { CATEGORIES, SIZES, CONDITIONS } from "./constants";
 
 export type Product = {
@@ -9,10 +10,11 @@ export type Product = {
   condition: typeof CONDITIONS[number];
   size: typeof SIZES[number];
   color: string;
-  images: string[]; // Placeholder IDs from placeholder-images.json
+  images: string[]; // URLs from Firebase Storage
   isFeatured: boolean;
   isSold: boolean;
-  createdAt: Date;
+  createdAt: any; // Allow for Firestore Timestamp
+  updatedAt?: any;
 };
 
 export type UserProfile = {

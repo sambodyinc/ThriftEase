@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Product } from "@/lib/types";
@@ -26,7 +26,11 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { CATEGORIES, CONDITIONS, SIZES } from "@/lib/constants";
-import { Trash } from "lucide-react";
+import { ImageUp, Trash2, X } from "lucide-react";
+import React, { useState } from "react";
+import { useUploadFile } from "@/hooks/use-upload-file";
+import Image from "next/image";
+import { Progress } from "./ui/progress";
 
 const formSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters."),
@@ -36,7 +40,7 @@ const formSchema = z.object({
   size: z.enum(SIZES),
   condition: z.enum(CONDITIONS),
   color: z.string().min(2, "Color is required."),
-  images: z.array(z.string().min(1, "Image ID cannot be empty.")).min(1, "At least one image is required."),
+  images: z.array(z.string().url("Must be a valid image URL.")).min(1, "At least one image is required."),
   isFeatured: z.boolean(),
   isSold: z.boolean(),
 });
@@ -45,6 +49,80 @@ type ProductFormProps = {
   initialData?: Product;
   onSubmit: (data: z.infer<typeof formSchema>) => void;
   isSubmitting: boolean;
+};
+
+const ImageUploader = ({ field }: { field: any }) => {
+  const [files, setFiles] = useState<File[]>([]);
+  const { uploadFiles, isUploading, progress } = useUploadFile();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(event.target.files || []);
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  };
+
+  const handleUpload = async () => {
+    const uploadedUrls = await uploadFiles(files);
+    const newImageUrls = [...(field.value || []), ...uploadedUrls];
+    field.onChange(newImageUrls);
+    setFiles([]); // Clear the file list after upload
+  };
+
+  const handleRemoveUrl = (urlToRemove: string) => {
+    field.onChange(field.value.filter((url: string) => url !== urlToRemove));
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Display uploaded images */}
+      {field.value && field.value.length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+          {field.value.map((url: string, index: number) => (
+            <div key={index} className="relative group aspect-square">
+              <Image src={url} alt={`Product image ${index + 1}`} fill className="object-cover rounded-md" />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleRemoveUrl(url)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* File input */}
+      <div className="flex items-center gap-4">
+        <Input
+          type="file"
+          ref={fileInputRef}
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+          accept="image/*"
+        />
+        <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+          <ImageUp className="mr-2 h-4 w-4" />
+          Choose Files ({files.length})
+        </Button>
+        {files.length > 0 && (
+          <Button type="button" onClick={handleUpload} disabled={isUploading}>
+            {isUploading ? "Uploading..." : "Upload Files"}
+          </Button>
+        )}
+      </div>
+      
+      {isUploading && (
+        <div className="space-y-2">
+            <Progress value={Object.values(progress).reduce((a, b) => a + b, 0) / Object.keys(progress).length} />
+            <p className="text-sm text-muted-foreground">Uploading files, please wait...</p>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductFormProps) => {
@@ -62,21 +140,15 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
           size: "M",
           condition: "Gently Used",
           color: "",
-          images: ["p001_1"],
+          images: [],
           isFeatured: false,
           isSold: false,
         },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "images",
-  });
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {/* Name */}
         <FormField
           control={form.control}
           name="name"
@@ -90,8 +162,6 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
             </FormItem>
           )}
         />
-
-        {/* Description */}
         <FormField
           control={form.control}
           name="description"
@@ -109,209 +179,167 @@ export const ProductForm = ({ initialData, onSubmit, isSubmitting }: ProductForm
             </FormItem>
           )}
         />
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Price */}
-            <FormField
+          <FormField
             control={form.control}
             name="price"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Price (KES)</FormLabel>
                 <FormControl>
-                    <Input type="number" placeholder="1500" {...field} />
+                  <Input type="number" placeholder="1500" {...field} />
                 </FormControl>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-
-            {/* Color */}
-            <FormField
+          />
+          <FormField
             control={form.control}
             name="color"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Color</FormLabel>
                 <FormControl>
-                    <Input placeholder="e.g., Blue" {...field} />
+                  <Input placeholder="e.g., Blue" {...field} />
                 </FormControl>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
+          />
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Category */}
-            <FormField
+          <FormField
             control={form.control}
             name="category"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Category</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
+                  <FormControl>
                     <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
+                  </FormControl>
+                  <SelectContent>
                     {CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
+                      <SelectItem key={cat} value={cat}>
                         {cat}
-                        </SelectItem>
+                      </SelectItem>
                     ))}
-                    </SelectContent>
+                  </SelectContent>
                 </Select>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-
-            {/* Size */}
-            <FormField
+          />
+          <FormField
             control={form.control}
             name="size"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Size</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
+                  <FormControl>
                     <SelectTrigger>
-                        <SelectValue placeholder="Select a size" />
+                      <SelectValue placeholder="Select a size" />
                     </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
+                  </FormControl>
+                  <SelectContent>
                     {SIZES.map((s) => (
-                        <SelectItem key={s} value={s}>
+                      <SelectItem key={s} value={s}>
                         {s}
-                        </SelectItem>
+                      </SelectItem>
                     ))}
-                    </SelectContent>
+                  </SelectContent>
                 </Select>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-            
-            {/* Condition */}
-            <FormField
+          />
+          <FormField
             control={form.control}
             name="condition"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Condition</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
+                  <FormControl>
                     <SelectTrigger>
-                        <SelectValue placeholder="Select a condition" />
+                      <SelectValue placeholder="Select a condition" />
                     </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
+                  </FormControl>
+                  <SelectContent>
                     {CONDITIONS.map((c) => (
-                        <SelectItem key={c} value={c}>
+                      <SelectItem key={c} value={c}>
                         {c}
-                        </SelectItem>
+                      </SelectItem>
                     ))}
-                    </SelectContent>
+                  </SelectContent>
                 </Select>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
+          />
         </div>
-
-         {/* Images */}
-        <div>
-          <FormLabel>Images</FormLabel>
-          <FormDescription>
-            Enter the IDs of the placeholder images. You can find these in{" "}
-            <code>src/lib/placeholder-images.json</code>.
-          </FormDescription>
-          <div className="space-y-4 mt-4">
-            {fields.map((field, index) => (
-              <FormField
-                key={field.id}
-                control={form.control}
-                name={`images.${index}`}
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center gap-2">
-                      <FormControl>
-                        <Input placeholder="e.g., p001_1" {...field} />
-                      </FormControl>
-                      {fields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </FormItem>
-                )}
-              />
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => append("")}
-            >
-              Add Image
-            </Button>
-             <FormMessage>{form.formState.errors.images?.message}</FormMessage>
-          </div>
-        </div>
-
+        
+        <FormField
+          control={form.control}
+          name="images"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Images</FormLabel>
+              <FormDescription>
+                Upload one or more images for the product. The first image will be the main display image.
+              </FormDescription>
+              <FormControl>
+                <ImageUploader field={field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* isFeatured */}
-            <FormField
+          <FormField
             control={form.control}
             name="isFeatured"
             render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                    <FormLabel>Featured Product</FormLabel>
-                    <FormDescription>
+                  <FormLabel>Featured Product</FormLabel>
+                  <FormDescription>
                     Featured products appear on the home page.
-                    </FormDescription>
+                  </FormDescription>
                 </div>
                 <FormControl>
-                    <Switch
+                  <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    />
+                  />
                 </FormControl>
-                </FormItem>
+              </FormItem>
             )}
-            />
-
-            {/* isSold */}
-            <FormField
+          />
+          <FormField
             control={form.control}
             name="isSold"
             render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                    <FormLabel>Sold Status</FormLabel>
-                    <FormDescription>
+                  <FormLabel>Sold Status</FormLabel>
+                  <FormDescription>
                     Mark this product as sold.
-                    </FormDescription>
+                  </FormDescription>
                 </div>
                 <FormControl>
-                    <Switch
+                  <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    />
+                  />
                 </FormControl>
-                </FormItem>
+              </FormItem>
             )}
-            />
+          />
         </div>
 
         <Button type="submit" disabled={isSubmitting}>

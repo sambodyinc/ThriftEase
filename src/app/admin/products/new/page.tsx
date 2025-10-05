@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import * as z from "zod";
 
-// Re-defining the schema from ProductForm for use in the onSubmit handler
 const formSchema = z.object({
   name: z.string().min(3),
   description: z.string().min(10),
@@ -18,11 +17,10 @@ const formSchema = z.object({
   size: z.string(),
   condition: z.string(),
   color: z.string().min(2),
-  images: z.array(z.string().min(1)),
+  images: z.array(z.string().url()).min(1),
   isFeatured: z.boolean(),
   isSold: z.boolean(),
 });
-
 
 export default function NewProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,10 +33,10 @@ export default function NewProductPage() {
     try {
         const productsRef = collection(firestore, 'products');
         
-        // Use non-blocking write
         addDocumentNonBlocking(productsRef, {
             ...data,
             createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
         });
       
         toast({
@@ -47,7 +45,7 @@ export default function NewProductPage() {
         });
 
         router.push("/admin/products");
-        router.refresh(); // Refresh server components
+        router.refresh(); 
     } catch (error: any) {
         console.error("Error creating product:", error);
         toast({
@@ -55,6 +53,7 @@ export default function NewProductPage() {
             title: "Something went wrong",
             description: error.message || "Could not create the product.",
         });
+    } finally {
         setIsSubmitting(false);
     }
   };

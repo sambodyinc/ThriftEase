@@ -11,7 +11,6 @@ import * as z from "zod";
 import { Product } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Re-defining the schema from ProductForm for use in the onSubmit handler
 const formSchema = z.object({
   name: z.string().min(3),
   description: z.string().min(10),
@@ -20,11 +19,10 @@ const formSchema = z.object({
   size: z.string(),
   condition: z.string(),
   color: z.string().min(2),
-  images: z.array(z.string().min(1)),
+  images: z.array(z.string().url()).min(1),
   isFeatured: z.boolean(),
   isSold: z.boolean(),
 });
-
 
 export default function EditProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,6 +65,7 @@ export default function EditProductPage() {
             title: "Something went wrong",
             description: error.message || "Could not update the product.",
         });
+    } finally {
         setIsSubmitting(false);
     }
   };
@@ -98,7 +97,6 @@ export default function EditProductPage() {
   if (!product) {
       return <div className="p-8">Product not found.</div>;
   }
-
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">

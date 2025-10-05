@@ -1,10 +1,10 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ShoppingBag, Shirt, Minus } from 'lucide-react';
 import { ProductCard } from '@/components/ProductCard';
 import { sampleProducts } from '@/lib/data';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-recommendations';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -74,7 +74,11 @@ const PersonalizedRecs = async () => {
 
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
+  const heroImage = {
+      imageUrl: "https://images.unsplash.com/photo-1517583010307-3f789911b89c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx0aHJpZnQlMjBmYXNoaW9ufGVufDB8fHx8MTc1OTY4NzgxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      description: "Stylish woman smiling, holding a stack of vintage clothes.",
+      imageHint: "thrift fashion"
+  };
   const justInProducts = sampleProducts.filter(p => !p.isSold).slice(0, 4);
 
   const categories = [

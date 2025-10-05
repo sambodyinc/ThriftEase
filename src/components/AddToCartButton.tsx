@@ -1,10 +1,10 @@
+
 "use client"
 
 import { useCart } from "@/hooks/use-cart";
 import { Product } from "@/lib/types";
 import { Button } from "./ui/button";
 import { ShoppingBag } from "lucide-react";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 interface AddToCartButtonProps {
     product: Product;
@@ -14,14 +14,15 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     const { addToCart } = useCart();
 
     const handleAddToCart = () => {
-        const firstImage = PlaceHolderImages.find(p => p.id === product.images[0]);
+        // Use the first image URL from the product's image array
+        const firstImage = product.images[0];
         if (firstImage) {
             addToCart({
                 productId: product.id,
                 name: product.name,
                 price: product.price,
                 quantity: 1,
-                image: firstImage.imageUrl,
+                image: firstImage,
                 size: product.size,
             });
         }

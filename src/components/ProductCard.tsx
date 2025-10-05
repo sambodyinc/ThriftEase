@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -6,7 +7,6 @@ import { motion } from 'framer-motion';
 import type { Product } from '@/lib/types';
 import { Badge } from './ui/badge';
 import { formatCurrency } from '@/lib/utils';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from './ui/button';
 import { ShoppingBag } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
@@ -17,7 +17,7 @@ type ProductCardProps = {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
-  const firstImage = PlaceHolderImages.find(p => p.id === product.images[0]);
+  const firstImage = product.images[0]; // First image is the URL string
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -28,7 +28,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             name: product.name,
             price: product.price,
             quantity: 1,
-            image: firstImage.imageUrl,
+            image: firstImage,
             size: product.size,
         });
     }
@@ -49,15 +49,18 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               </span>
             </div>
           )}
-          {firstImage && (
+          {firstImage ? (
             <Image
-              src={firstImage.imageUrl}
+              src={firstImage}
               alt={product.name}
               width={600}
               height={800}
-              data-ai-hint={firstImage.imageHint}
               className="h-80 w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
             />
+          ) : (
+            <div className="h-80 w-full bg-muted flex items-center justify-center">
+              <span className="text-muted-foreground">No Image</span>
+            </div>
           )}
           <div className="absolute top-3 left-3">
              <Badge variant="secondary">{product.condition}</Badge>
