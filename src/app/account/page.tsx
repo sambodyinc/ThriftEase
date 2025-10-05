@@ -1,10 +1,11 @@
+
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUser, useAuth } from "@/firebase";
+import { useUser, useAuth, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -16,13 +17,9 @@ import * as z from "zod";
 import { updateProfile } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-
-// Mock data for orders, will be replaced with real data later
-const orders = [
-    { id: "ORD001", date: "2023-10-15", total: 45.00, status: "Delivered", items: 1 },
-    { id: "ORD002", date: "2023-10-20", total: 60.00, status: "Shipped", items: 1 },
-    { id: "ORD003", date: "2023-10-25", total: 28.00, status: "Processing", items: 1 },
-];
+import { UserOrder } from "@/lib/types";
+import { collection } from "firebase/firestore";
+import { formatCurrency } from "@/lib/utils";
 
 const profileSchema = z.object({
   displayName: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -33,8 +30,16 @@ export default function AccountPage() {
     const { user, isUserLoading } = useUser();
     const router = useRouter();
     const auth = useAuth();
+    const firestore = useFirestore();
     const { toast } = useToast();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const ordersQuery = useMemoFirebase(() => {
+        if (!user) return null;
+        return collection(firestore, 'users', user.uid, 'user_orders');
+    }, [firestore, user]);
+
+    const { data: orders, isLoading: isLoadingOrders } = useCollection<UserOrder>(ordersQuery);
 
     const form = useForm<z.infer<typeof profileSchema>>({
         resolver: zodResolver(profileSchema),
@@ -86,6 +91,14 @@ export default function AccountPage() {
         if (!name) return 'U';
         return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     }
+    
+    const formatOrderDate = (timestamp: any) => {
+        if (!timestamp) return 'N/A';
+        // Firestore timestamps can be seconds/nanoseconds objects, or JS Dates.
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString();
+    }
+
 
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -154,18 +167,27 @@ export default function AccountPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        {orders.map(order => (
-                                            <div key={order.id} className="flex justify-between items-center p-4 border rounded-md">
-                                                <div>
-                                                    <p className="font-semibold">{order.id}</p>
-                                                    <p className="text-sm text-muted-foreground">{order.date} - {order.items} item(s)</p>
-                                                </div>
-                                                <div className="text-right">
-                                                     <p className="font-semibold">${order.total.toFixed(2)}</p>
-                                                     <p className="text-sm text-primary">{order.status}</p>
-                                                </div>
+                                        {isLoadingOrders ? (
+                                            <div className="space-y-4">
+                                                <Skeleton className="h-16 w-full" />
+                                                <Skeleton className="h-16 w-full" />
                                             </div>
-                                        ))}
+                                        ) : orders && orders.length > 0 ? (
+                                            orders.map(order => (
+                                                <div key={order.id} className="flex justify-between items-center p-4 border rounded-md">
+                                                    <div>
+                                                        <p className="font-semibold">{order.id.substring(0, 7).toUpperCase()}</p>
+                                                        <p className="text-sm text-muted-foreground">{formatOrderDate(order.timestamp)} - {order.items.length} item(s)</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                         <p className="font-semibold">{formatCurrency(order.total)}</p>
+                                                         <p className="text-sm text-primary">{order.status}</p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-center py-8 text-muted-foreground">You haven't placed any orders yet.</p>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -224,3 +246,5 @@ const AccountPageSkeleton = () => (
         </div>
     </div>
 );
+
+    
